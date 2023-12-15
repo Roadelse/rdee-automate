@@ -27,6 +27,48 @@
     reGoto()
 }
 
+; ---------- toolPanel
+>+>!F2::
+{
+    toolpanel()
+}
+
+; ---------- quick open
+; ... open windoes-terminal at current path of active explorer
+>+>!1::
+{
+    path := "D:\"
+    if (WinActive("ahk_class CabinetWClass")) {
+        ; Try to get the path of the active Explorer window
+        for window in ComObject("Shell.Application").Windows() {
+            try {
+                if (window.HWND = WinActive("A")) {
+                    path := window.Document.Folder.Self.Path
+                    Break
+                }
+            }
+        }
+    }
+    Run(Format("wt.exe -d {}", path))
+}
+
+; ... (Admin) open windoes-terminal at current path of active explorer
+>+>!2::
+{
+    path := "D:\"
+    if (WinActive("ahk_class CabinetWClass")) {
+        ; Try to get the path of the active Explorer window
+        for window in ComObject("Shell.Application").Windows() {
+            try {
+                if (window.HWND = WinActive("A")) {
+                    path := window.Document.Folder.Self.Path
+                    Break
+                }
+            }
+        }
+    }
+    Run(Format("*RunAs cmd.exe /c wt -d {}", path))
+}
 
 ; >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Explorer hotkeys
 ; ---------- rob-system
@@ -37,11 +79,6 @@
 }
 #HotIf
 
-; ---------- toolPanel
->+>!F2::
-{
-    toolpanel()
-}
 
 
 ; >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Obsidian hotkeys
