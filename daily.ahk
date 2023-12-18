@@ -87,6 +87,26 @@
 {
     SendInput("<sub style=`"color:gray`">@" . FormatTime(,"yyyy-MM-dd HH:mm:ss") . "</sub>")
 }
+::@@red::
+{
+    SendInput('<font color="red"></font>')
+    SendInput('{Left 7}')
+}
+::@@green::
+{
+    SendInput('<font color="green"></font>')
+    SendInput('{Left 7}')
+}
+::@@yellow::
+{
+    SendInput('<font color="yellow"></font>')
+    SendInput('{Left 7}')
+}
+::@@blue::
+{
+    SendInput('<font color="blue"></font>')
+    SendInput('{Left 7}')
+}
 #HotIf
 
 
