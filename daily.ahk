@@ -314,18 +314,25 @@ tp_fastlink(*){
         if fe_from = ""{
             MsgBox("Target doesn't exist!")
             return
-        } else if fe_from = "D"
+        } else if InStr(fe_from, "D")  ; cannot use "= D" since it may be "AD" such as within OneDrive
             option := "/D"
         else
             option := ""
 
         if fe_to != ""{
-            MsgBox("Link already exists!")
-            return
+            if InStr(fe_to, "D"){
+                path_to := edit_to.Text . "\" . GetBaseName(edit_from.Text)
+            } else {
+                MsgBox("Link already exists!")
+                return
+            }
+        } else {
+                path_to := edit_to.Text
         }
 
         ; ..... execution
-        ret_code := RunWait(Format("*RunAs cmd.exe /c mklink {} `"{}`" `"{}`"", option, edit_to.Text, edit_from.Text),,"Hide")
+        ; MsgBox(Format("{}  *RunAs cmd.exe /c mklink {} `"{}`" `"{}`"", fe_from, option, path_to, edit_from.Text))
+        ret_code := RunWait(Format("*RunAs cmd.exe /c mklink {} `"{}`" `"{}`"", option, path_to, edit_from.Text),,"Hide")
         if ret_code != 0 {
             MsgBox("Error! Fails to create symlink")
             return
