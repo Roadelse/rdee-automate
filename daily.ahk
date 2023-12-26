@@ -322,13 +322,19 @@ tp_fastlink(*){
         if fe_to != ""{
             if InStr(fe_to, "D"){
                 path_to := edit_to.Text . "\" . GetBaseName(edit_from.Text)
+                if FileExist(path_to) != "" {
+                    MsgBox("Link target already exists!")
+                    return
+                }
             } else {
-                MsgBox("Link already exists!")
+                MsgBox("Link target already exists!")
                 return
             }
         } else {
                 path_to := edit_to.Text
         }
+
+        
 
         ; ..... execution
         ; MsgBox(Format("{}  *RunAs cmd.exe /c mklink {} `"{}`" `"{}`"", fe_from, option, path_to, edit_from.Text))
