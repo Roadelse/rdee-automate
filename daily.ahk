@@ -5,9 +5,10 @@
 
 ; This script holds all hotkeys & hotstrings in daily windows operation, along with their execution functions
 
+; Major changes
 ; 2023-12-14    mitigated from ahk.rdee, with <rob-system> and <SG-system> already done
 ; 2023-12-14    <toolPanel#init>, <tp_fastlink#init>
-
+; 2023-12-26    <tp_fastmove#init>
 
 
 ; *******************************************************************
@@ -260,10 +261,15 @@ toolpanel(){
     mygui := Gui()
     ; ..... config events
     mygui.OnEvent("Close", guiClose)
+    mygui.OnEvent("Escape", guiClose)
 
     ; ------------------ add tools
+    ; ..... fast link
     btn_fastlink := MyGui.Add("Button", "Default", "fast link")
     btn_fastlink.OnEvent("Click", tp_fastlink)
+    ; ..... fast move
+    btn_fastmove := MyGui.Add("Button", "Default", "fast move")
+    btn_fastmove.OnEvent("Click", tp_fastmove)
 
     ; ------------- show
     mygui.Show()
@@ -351,3 +357,90 @@ tp_fastlink(*){
     }
 }
 
+tp_fastmove(*){
+    ;;; This function aims to quickly move selected file explorer windows, i.e., make target windows divide scrren following pre-defined protocol
+    ;;; Feature:
+    ;;;    ● split 2 file explorer windows evenly into left and right
+    ;;;    ● split 4 file explorer windows evenly into ↖↗↙↘
+
+    ; >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Get current file explorers and Store paths & HWNDs
+    paths := []
+    feids := []
+    for window in ComObject("Shell.Application").Windows() {
+        path := window.Document.Folder.Self.Path
+        paths.Push(path)
+        feids.Push(window.HWND)
+    }
+
+    ; >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> create main GUI and set controls
+    gui_fm := Gui()
+
+    gui_fm.OnEvent("Close", fastmove_cancel)
+    gui_fm.OnEvent("Escape", fastmove_cancel)
+
+    ; ------------- add checkbox in loop
+    cbs := []
+    Loop feids.Length {
+        cbs.Push(gui_fm.Add("CheckBox", "", paths[A_Index]))
+    }
+
+    ; ------------- add ok & cancel buttons
+    btn_ok := gui_fm.Add("Button", "Default Section", "OK")
+    btn_ok.OnEvent("Click", fastmove_ok)
+    btn_cancel := gui_fm.Add("Button", "Default ys", "Cancel")
+    btn_cancel.OnEvent("Click", fastmove_cancel)
+
+    ; ------------- show gui and return
+    gui_fm.Show()
+    return
+
+    ; >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Event functions & Core logic
+    fastmove_ok(*){
+        ; --------- Firstly, Submit
+        gui_fm.Submit(false)
+
+        ; --------- Get X/Y offset from Pos and ClientPos 
+        WinMaximize(feids[1])
+        WinGetPos(&xW, &yW, &wW, &hW, feids[1])
+        WinGetClientPos(&xC, &yC, &wC, &hC, feids[1])
+        ; MsgBox("x=" . xW . ", y=" . yW . ", wW=" . wW . ", hW=" . hW)
+        ; MsgBox("x=" . xC . ", y=" . yC . ", CC=" . wC . ", hC=" . hC)
+        WinRestore(feids[1])
+        xoffset := -xW
+        yoffset := -yW
+
+        ; --------- Get target file explorer windows
+        target_ids := []
+        for cb in cbs{
+            if cb.Value = 1
+                target_ids.Push(A_Index)
+        }
+
+        ; --------- Do the division depending on conditions
+        if target_ids.Length = 2{
+            WinMove(-xoffset, -yoffset, wC/2+2*xoffset, hC+yoffset, feids[target_ids[1]])
+            WinMove(wC/2-xoffset, -yoffset, wC/2+2*xoffset, hC+yoffset, feids[target_ids[2]])
+            WinActivate(feids[target_ids[1]])
+            WinActivate(feids[target_ids[2]])
+            ; WinGetClientPos(&xC, &yC,,, feids[target_ids[1]])
+            ; MsgBox("x=" . -xoffset . ", y=" . -yoffset . ", w=" . wC/2+2*xoffset . ", h=" . hC+yoffset)
+        } else if target_ids.Length = 4 {
+            WinMove(-xoffset, -yoffset, wC/2+2*xoffset, hC/2+yoffset, feids[target_ids[1]])
+            WinMove(wC/2-xoffset, -yoffset, wC/2+2*xoffset, hC/2+yoffset, feids[target_ids[2]])
+            WinMove(-xoffset, hC/2-yoffset, wC/2+2*xoffset, hC/2+yoffset, feids[target_ids[3]])
+            WinMove(wC/2-xoffset, hC/2-yoffset, wC/2+2*xoffset, hC/2+yoffset, feids[target_ids[4]])
+
+            WinActivate(feids[target_ids[1]])
+            WinActivate(feids[target_ids[2]])
+            WinActivate(feids[target_ids[3]])
+            WinActivate(feids[target_ids[4]])
+        } else {
+            MsgBox("Only support 2/4 windows fastMove by now")
+        }
+        gui_fm.Destroy()
+    }
+
+    fastmove_cancel(*){
+        gui_fm.Destroy()
+    }
+}

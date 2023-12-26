@@ -45,12 +45,7 @@ F1::
     fastmove_ok(*){
         gui_fm.Submit(false)
 
-        ; xC := 0
-        ; yC := 0
-        ; xW := 0
-        ; yW := 0
-        ; wW := 0
-        ; hW := 0
+
         WinMaximize(feids[1])
         WinGetPos(&xW, &yW, &wW, &hW, feids[1])
         WinGetClientPos(&xC, &yC, &wC, &hC, feids[1])
@@ -68,17 +63,23 @@ F1::
         if target_ids.Length = 2{
             WinMove(-xoffset, -yoffset, wC/2+2*xoffset, hC+yoffset, feids[target_ids[1]])
             WinMove(wC/2-xoffset, -yoffset, wC/2+2*xoffset, hC+yoffset, feids[target_ids[2]])
-            ; WinMove(xW, yW, wW/2, hW, feids[target_ids[1]])
-            ; WinMove(wW/2, yW, wW/2, hW, feids[target_ids[2]])
-            ; MsgBox("" . A_ScreenWidth/2 . target_ids[2])
-
-
-
             WinActivate(feids[target_ids[1]])
             WinActivate(feids[target_ids[2]])
             ; WinGetClientPos(&xC, &yC,,, feids[target_ids[1]])
-            MsgBox("x=" . -xoffset . ", y=" . -yoffset . ", w=" . wC/2+2*xoffset . ", h=" . hC+yoffset)
-        
+            ; MsgBox("x=" . -xoffset . ", y=" . -yoffset . ", w=" . wC/2+2*xoffset . ", h=" . hC+yoffset)
+        } else if target_ids.Length = 4 {
+            MsgBox("cp1")
+            WinMove(-xoffset, -yoffset, wC/2+2*xoffset, hC/2+yoffset, feids[target_ids[1]])
+            WinMove(wC/2-xoffset, -yoffset, wC/2+2*xoffset, hC/2+yoffset, feids[target_ids[2]])
+            WinMove(-xoffset, hC/2-yoffset, wC/2+2*xoffset, hC/2+yoffset, feids[target_ids[3]])
+            WinMove(wC/2-xoffset, hC/2-yoffset, wC/2+2*xoffset, hC/2+yoffset, feids[target_ids[4]])
+
+            WinActivate(feids[target_ids[1]])
+            WinActivate(feids[target_ids[2]])
+            WinActivate(feids[target_ids[3]])
+            WinActivate(feids[target_ids[4]])
+        } else {
+            MsgBox("Only support 2/4 windows fastMove by now")
         }
         gui_fm.Destroy()
     }
