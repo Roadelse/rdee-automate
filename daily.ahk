@@ -83,7 +83,7 @@
 
 
 ; >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Obsidian hotkeys
-#HotIf WinActive("ahk_exe Obsidian.exe")
+#HotIf WinActive("ahk_exe Obsidian.exe") or WinActive("ahk_exe Code.exe")
 ::@@_now::
 {
     SendInput("<sub style=`"color:gray`">@" . FormatTime(,"yyyy-MM-dd HH:mm:ss") . "</sub>")
