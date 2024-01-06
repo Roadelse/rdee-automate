@@ -72,11 +72,11 @@
 }
 
 ; >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Explorer hotkeys
-; ---------- rob-system
+; ---------- robs-system
 #HotIf WinActive("ahk_class CabinetWClass")
 >+>!F1::
 {
-    rob()
+    robs()
 }
 #HotIf
 
@@ -135,7 +135,11 @@ reSave(){
         sgMap := jxon_load(&sgContent)
     }
 
-    active_info := GetActiveWindowInfo()
+    awis := GetActiveWindowInfo()
+    if awis[2] = ""
+    	active_info := awis[1]
+    else
+        active_info := awis[2]
     name := InputBox("Set key for this uri: " . active_info, "reSave").Value
     if name != "" {  ;>- valid name 
         sgMap[name] := active_info
@@ -174,45 +178,58 @@ reGoto(){
 
 
 ; >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> roadelse sync system
-rob(){
-    static r_prefix := "D:\recRoot\Roadelse", o_prefix := EnvGet("USERPROFILE") . "\OneDrive\Roadelse", b_prefix := "D:\BaiduSyncdisk\Roadelse"
+robs(){
+    static r_prefix := "D:\recRoot\Roadelse", o_prefix := EnvGet("USERPROFILE") . "\OneDrive\recRoot\Roadelse", b_prefix := "D:\BaiduSyncdisk\recRoot\Roadelse", s_prefix := "D:\recRoot\StaticRecall"
     if (WinActive("ahk_class CabinetWClass")) {
         ; Try to get the path of the active Explorer window
         for window in ComObject("Shell.Application").Windows() {
             if (window.HWND = WinActive("A"))
                 path := window.Document.Folder.Self.Path
         }
-        rDirC := " ", oDirC := " ", bDirC := " "
+        rDirC := " ", oDirC := " ", bDirC := " ", sDirC := " "
         if startswith(path, r_prefix){
             rpath := path
             opath := StrReplace(path, r_prefix, o_prefix)
             bpath := StrReplace(path, r_prefix, b_prefix)
+            spath := StrReplace(path, r_prefix, s_prefix)
             rDirC := "*"
         } else if startswith(path, o_prefix) {
             rpath := StrReplace(path, o_prefix, r_prefix)
             opath := path
             bpath := StrReplace(path, o_prefix, b_prefix)
+            spath := StrReplace(path, o_prefix, s_prefix)
             oDirC := "*"
         } else if startswith(path, b_prefix) {
             rpath := StrReplace(path, b_prefix, r_prefix)
             opath := StrReplace(path, b_prefix, o_prefix)
             bpath := path
+            spath := StrReplace(path, b_prefix, s_prefix)
             bDirC := "*"
+        } else if startswith(path, s_prefix) {
+            rpath := StrReplace(path, s_prefix, r_prefix)
+            opath := StrReplace(path, s_prefix, o_prefix)
+            bpath := StrReplace(path, s_prefix, b_prefix)
+            spath := path
+            sDirC := "*"
         } else {
-            MsgBox("Not in rob/Roadelse system path!")
+            MsgBox("Not in robs/Roadelse system path! " . path)
             return
         }
         rDirE := FileExist(rpath) ? "√" : "x"
         oDirE := FileExist(opath) ? "√" : "x"
         bDirE := FileExist(bpath) ? "√" : "x"
+        sDirE := FileExist(spath) ? "√" : "x"
 
         MyGui := Gui()
         RvO := MyGui.Add("Radio", "vclickO", Format("OneDrive ({}){}  : {}", oDirE, oDirC, opath))
         RvB := MyGui.Add("Radio", "vclickB", Format("BaiduSync({}){}  : {}", bDirE, bDirC, bpath))
-        RvR := MyGui.Add("Radio", "vclickR", Format("recRoot  ({}){}  : {}", rDirE, rDirC, rpath))
+        RvR := MyGui.Add("Radio", "vclickR", Format("Roadelse  ({}){}  : {}", rDirE, rDirC, rpath))
+        RvS := MyGui.Add("Radio", "vclickS", Format("StaticRecall  ({}){}  : {}", sDirE, sDirC, spath))
         MyGui.OnEvent("Close", gui_cancel)
+        MyGui.OnEvent("Escape", gui_cancel)
 
-        CB_cst := MyGui.Add("CheckBox", "vCreateShortcut", "Create shortcuts among r.o.b.? (auto mkdir)")
+
+        CB_cst := MyGui.Add("CheckBox", "vCreateShortcut", "Create shortcuts among r.o.b.s.? (auto mkdir)")
 
         B_ok := MyGui.Add("Button", "Default Section", "OK")  ;>- Section starts a new section, for column layout, i.e., ys below
         B_ok.OnEvent("Click", gui_ok)
@@ -235,6 +252,8 @@ rob(){
                 mkdir_and_run(bpath)
             else if RvR.Value = 1
                 mkdir_and_run(rpath)
+            else if RvS.Value = 1
+                mkdir_and_run(spath)            
 
             if CB_cst.Value = 1
             {
@@ -246,14 +265,17 @@ rob(){
                 FileCreateShortcut(opath, bpath . "\→OneDrive.lnk", , , , "C:\Users\roadelse\OneDrive\Pictures\OneDrive-icon.ico")
                 FileCreateShortcut(bpath, rpath . "\→BaiduSync.lnk", , , , "C:\Users\roadelse\OneDrive\Pictures\baiduYun-icon.ico")
                 FileCreateShortcut(bpath, opath . "\→BaiduSync.lnk", , , , "C:\Users\roadelse\OneDrive\Pictures\baiduYun-icon.ico")
-                FileCreateShortcut(rpath, bpath . "\→StaticRecall.lnk", , , , "C:\Users\roadelse\OneDrive\Pictures\StaticRecall.RGB-FFAA6E.ico")
-                FileCreateShortcut(rpath, opath . "\→StaticRecall.lnk", , , , "C:\Users\roadelse\OneDrive\Pictures\StaticRecall.RGB-FFAA6E.ico")
+                FileCreateShortcut(rpath, bpath . "\→StaticRecall.lnk", , , , "C:\Users\roadelse\OneDrive\Pictures\Roadelse.ico")
+                FileCreateShortcut(rpath, opath . "\→StaticRecall.lnk", , , , "C:\Users\roadelse\OneDrive\Pictures\Roadelse.ico")
+
+                FileCreateShortcut(spath, rpath . "\→StaticRecall.lnk", , , , "C:\Users\roadelse\OneDrive\Pictures\StaticRecall.RGB-FFAA6E.ico")
+
             }
 
             MyGui.Destroy()
         }
     }
-    MsgBox("Not in rob/Roadelse system path!")
+    MsgBox("Not in rob/Roadelse system path! " . path)
     return
 }
 
