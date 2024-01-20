@@ -108,6 +108,11 @@
     SendInput('<font color="blue"></font>')
     SendInput('{Left 7}')
 }
+::@@gray::
+{
+    SendInput('<font color="gray"></font>')
+    SendInput('{Left 7}')
+}
 #HotIf
 
 
