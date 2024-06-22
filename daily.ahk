@@ -16,6 +16,15 @@
 ; *******************************************************************
 
 
+
+; *******************************************************************
+; Related grammars for future reviewing
+; *******************************************************************
+; + String
+;   + concatenation: s1 . s2 . "any" . s3
+;   + escape: use `
+
+
 ; >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> General hotkeys
 >+>!S::
 {
@@ -117,6 +126,15 @@
 {
     SendInput('<font color="gray"></font>')
     SendInput('{Left 7}')
+}
+::@@note::
+{
+    SendInput('<sub style=`"color:gray`"></sub>')
+    SendInput('{Left 6}')
+}
+::@@gpt::
+{
+    SendInput('<sub style=`"color:gray`">GPT</sub>')
 }
 #HotIf
 
